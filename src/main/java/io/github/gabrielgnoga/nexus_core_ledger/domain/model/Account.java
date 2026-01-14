@@ -6,10 +6,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name = "accounts")
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -20,7 +19,7 @@ public class Account {
     private UUID id;
 
     @Column(nullable = false)
-    private String ownerName;
+    private String name;
 
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal balance;
@@ -29,13 +28,16 @@ public class Account {
     private String currency;
 
     @Enumerated(EnumType.STRING)
-    private AccountType type;
+    @Column(name = "account_type", nullable = false)
+    private AccountType accountType;
 
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         if (this.balance == null) this.balance = BigDecimal.ZERO;
+        if (this.currency == null) this.currency = "BRL"; // Garante um padrão
     }
 }
