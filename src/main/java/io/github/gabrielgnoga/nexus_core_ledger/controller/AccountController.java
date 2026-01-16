@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.*;
  *
  * <p>Base URL: <code>/api/accounts</code></p>
  *
- * @author Gabriel Gnoga
+ * @author Gabriel Noga
+ * @since 1.0.0
  */
 @RestController
 @RequestMapping("/api/accounts")
@@ -33,6 +34,7 @@ public class AccountController {
      *
      * @param dto Payload JSON mapeado automaticamente. Requer validação (@Valid).
      * @return ResponseEntity contendo a conta criada e status HTTP 201 (Created).
+     *
      */
     @PostMapping
     public ResponseEntity<Account> create(@RequestBody @Valid CreateAccountDTO dto) {
