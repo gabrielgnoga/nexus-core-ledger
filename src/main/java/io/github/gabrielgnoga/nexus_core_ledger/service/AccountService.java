@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Serviço responsável pela lógica de negócios relacionada a Contas.
  *
@@ -54,5 +56,15 @@ public class AccountService {
                 .build();
 
         return accountRepository.save(newAccount);
+    }
+    /**
+     * Recupera todas as contas cadastradas no sistema.
+     *
+     * <p>Utiliza o método padrão {@code findAll()} do JPA para buscar todos os registros.</p>
+     *
+     * @return Uma lista contendo todas as contas encontradas. Retorna lista vazia se não houver nada.
+     */
+    public List<Account> listAllAccounts() {
+        return accountRepository.findAll();
     }
 }

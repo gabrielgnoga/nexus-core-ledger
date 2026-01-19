@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * Controlador REST responsável por expor os endpoints de gerenciamento de Contas.
  *
@@ -38,11 +40,19 @@ public class AccountController {
      */
     @PostMapping
     public ResponseEntity<Account> create(@RequestBody @Valid CreateAccountDTO dto) {
-        // 1. Recebe o JSON e valida
-        // 2. Chama o serviço para executar a regra de negócio
         Account newAccount = accountService.createAccount(dto);
-
-        // 3. Retorna HTTP 201 (Created) com os dados da nova conta
         return ResponseEntity.status(HttpStatus.CREATED).body(newAccount);
+    }
+    /**
+     * Endpoint para listar todas as contas.
+     *
+     * <p>Retorna uma lista JSON com todos os registros encontrados no banco.</p>
+     *
+     * @return ResponseEntity contendo a lista de contas e status HTTP 200 (OK).
+     */
+    @GetMapping
+    public ResponseEntity<List<Account>> listAll() {
+        List<Account> accounts = accountService.listAllAccounts();
+        return ResponseEntity.ok(accounts);
     }
 }
