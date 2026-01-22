@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Serviço responsável pela lógica de negócios relacionada a Contas.
@@ -66,5 +68,31 @@ public class AccountService {
      */
     public List<Account> listAllAccounts() {
         return accountRepository.findAll();
+    }
+    /**
+     * Busca uma conta específica pelo seu ID único.
+     *
+     * <p>Retorna um {@link Optional} porque a conta pode não existir no banco.
+     * Isso obriga quem chamar este método a tratar o cenário de "Não Encontrado".</p>
+     *
+     * @param id O UUID da conta.
+     * @return Um Optional contendo a conta (se existir) ou vazio.
+     */
+    public Optional<Account> findAccountById(UUID id) {
+        return accountRepository.findById(id);
+    }
+    /**
+     * Exclui uma conta do banco de dados.
+     *
+     * <p>Primeiro verifica se o ID existe. Se não existir, lança um erro
+     * Se existir, manda o repositório apagar.</p>
+     *
+     * @param id O UUID da conta a ser excluída.
+     */
+    public void deleteAccount(UUID id) {
+        if (!accountRepository.existsById(id)) {
+            throw new IllegalArgumentException("Conta não encontrada para exclusão.");
+        }
+        accountRepository.deleteById(id);
     }
 }
