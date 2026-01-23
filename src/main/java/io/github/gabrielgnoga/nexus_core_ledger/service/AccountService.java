@@ -95,4 +95,23 @@ public class AccountService {
         }
         accountRepository.deleteById(id);
     }
+    /**
+     * Atualiza os dados de uma conta existente.
+     *
+     * <p>Regra de Ouro: Buscamos a conta primeiro para garantir que o ID existe
+     * e para manter os dados que NÃO podem mudar (como id, createdAt e balance).</p>
+     *
+     * @param id O UUID da conta a ser atualizada.
+     * @param dto Os novos dados (Nome, Tipo).
+     * @return A conta atualizada.
+     */
+    public Account updateAccount(UUID id, CreateAccountDTO dto) {
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada."));
+
+        account.setName(dto.getName());
+        account.setAccountType(AccountType.valueOf(dto.getAccountType().toUpperCase()));
+
+        return accountRepository.save(account);
+    }
 }

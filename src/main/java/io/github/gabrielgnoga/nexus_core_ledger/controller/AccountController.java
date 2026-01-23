@@ -84,4 +84,16 @@ public class AccountController {
 
         return ResponseEntity.noContent().build();
     }
+    /**
+     * Endpoint para atualizar uma conta.
+     *
+     * @param id O ID passado na URL.
+     * @param dto O JSON com os novos dados.
+     * @return A conta já atualizada.
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<Account> update(@PathVariable UUID id, @RequestBody @Valid CreateAccountDTO dto) {
+        Account updatedAccount = accountService.updateAccount(id, dto);
+        return ResponseEntity.ok(updatedAccount);
+    }
 }
