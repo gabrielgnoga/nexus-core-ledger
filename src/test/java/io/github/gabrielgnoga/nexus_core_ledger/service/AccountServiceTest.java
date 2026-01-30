@@ -76,7 +76,7 @@ class AccountServiceTest {
     @Test
     @DisplayName("Deve retornar Vazio quando buscar um ID que não existe")
     void findAccountById_ShouldReturnEmpty_WhenIdDoesNotExist() {
-        // --- ARRANGE ---
+        // prep
         UUID idFalso = UUID.randomUUID();
 
         // caso esteja vazio
