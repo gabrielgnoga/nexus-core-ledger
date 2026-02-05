@@ -3,20 +3,18 @@ spring:
     name: nexus-core-ledger
 
   datasource:
-    url: jdbc:h2:mem:nexusdb
-    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:nexus_db
     username: sa
     password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 
   h2:
     console:
       enabled: true
-
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-    hibernate:
-      ddl-auto: update
-    database-platform: org.hibernate.dialect.H2Dialect
+      path: /h2-console
