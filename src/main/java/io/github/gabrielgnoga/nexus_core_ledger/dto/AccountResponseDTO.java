@@ -1,7 +1,9 @@
 package io.github.gabrielgnoga.nexus_core_ledger.dto;
 
+import io.github.gabrielgnoga.nexus_core_ledger.domain.model.Account;
 import io.github.gabrielgnoga.nexus_core_ledger.domain.model.AccountType;
-import lombok.Data;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -9,38 +11,42 @@ import java.util.UUID;
 /**
  * Objeto de Transferência de Dados (DTO) para respostas de Conta.
  *
- * <p>Esta classe define exatamente o que será devolvido no JSON para o cliente (Frontend/API).
- * Ela serve como uma camada de proteção, garantindo que apenas dados públicos sejam expostos,
- * ocultando detalhes internos da entidade {@code Account}.</p>
+ * <p>Versão imutável (Record) que garante a integridade dos dados
+ * durante o transporte da API para o cliente.</p>
  *
  * @author Gabriel Gnoga
  * @since 1.0.0
  */
-@Data
-public class AccountResponseDTO {
+@Schema(description = "Resposta contendo os detalhes da conta bancária")
+public record AccountResponseDTO(
 
-    private UUID id;
-    private String name;
-    private BigDecimal balance;
-    private AccountType accountType;
-    private LocalDateTime createdAt;
+        @Schema(description = "ID único da conta", example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
+        UUID id,
 
-    public AccountResponseDTO() {}
+        @Schema(description = "Nome de identificação (Apelido)", example = "Minha Carteira Principal")
+        String name,
+
+        @Schema(description = "Saldo atual disponível", example = "1250.50")
+        BigDecimal balance,
+
+        @Schema(description = "Tipo da conta", example = "CHECKING")
+        AccountType accountType,
+
+        @Schema(description = "Data de criação da conta", example = "2026-02-11T10:00:00")
+        LocalDateTime createdAt
+) {
 
     /**
-     * Construtor completo para facilitar a criação do DTO.
-     *
-     * @param id Identificador da conta.
-     * @param name Nome da conta.
-     * @param balance Saldo atual.
-     * @param accountType Categoria contábil.
-     * @param createdAt Data de criação.
+     * Converte uma Entidade {@link Account} para este DTO.
+     * Método estático para facilitar a conversão no Controller.
      */
-    public AccountResponseDTO(UUID id, String name, BigDecimal balance, AccountType accountType, LocalDateTime createdAt) {
-        this.id = id;
-        this.name = name;
-        this.balance = balance;
-        this.accountType = accountType;
-        this.createdAt = createdAt;
+    public static AccountResponseDTO fromEntity(Account account) {
+        return new AccountResponseDTO(
+                account.getId(),
+                account.getName(),
+                account.getBalance(),
+                account.getAccountType(),
+                LocalDateTime.now()
+        );
     }
 }

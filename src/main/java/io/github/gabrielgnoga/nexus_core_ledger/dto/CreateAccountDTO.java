@@ -1,10 +1,11 @@
 package io.github.gabrielgnoga.nexus_core_ledger.dto;
 
+import io.github.gabrielgnoga.nexus_core_ledger.domain.model.AccountType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-
 /**
  * Data Transfer Object (DTO) responsável por capturar os dados iniciais
  * para a criação de uma nova conta.
@@ -15,14 +16,20 @@ import lombok.Data;
  * @author Gabriel Gnoga
  * @since 1.0.0
  */
+
 @Data
+@Schema(description = "Dados para abertura de nova conta")
 public class CreateAccountDTO {
 
-    @NotBlank(message = "O nome da conta é obrigatório")
-    @Size(min = 3, max = 50, message = "O nome deve ter entre 3 e 50 caracteres")
+    @Schema(description = "Nome da conta (Apelido)", example = "Minha Carteira")
+    @NotBlank(message = "O nome é obrigatório")
+    @Size(min = 3, max = 50)
     private String name;
 
+
+
+    @Schema(description = "Tipo da conta")
     @NotNull(message = "O tipo da conta é obrigatório")
-    private String accountType;
+    private AccountType accountType;
 
 }

@@ -19,35 +19,29 @@ import java.time.LocalDateTime;
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
-    private final AccountRepository accountRepository; // Precisamos dele pra achar a conta!
+    private final AccountRepository accountRepository;
 
-    @Transactional // Garante que tudo acontece ou nada acontece (Atomicidade)
+    @Transactional
     public TransactionResponseDTO create(TransactionRequestDTO data) {
-        // 1. Buscar a conta (Se não achar, grita erro)
         Account account = accountRepository.findById(data.accountId())
                 .orElseThrow(() -> new ResourceNotFoundException("Conta não encontrada com ID: " + data.accountId()));
 
-        // 2. Criar a Transação
         Transaction transaction = new Transaction();
         transaction.setAmount(data.amount());
         transaction.setType(data.type());
         transaction.setDescription(data.description());
         transaction.setTimestamp(LocalDateTime.now());
-        transaction.setAccount(account); // Aqui ligamos a transação à conta!
+        transaction.setAccount(account);
 
-        // 3. Atualizar o Saldo da Conta (Regra de Negócio)
-        // Se é CRÉDITO, soma. Se é DÉBITO, subtrai.
         if (transaction.getType() == TransactionType.CREDIT) {
             account.setBalance(account.getBalance().add(data.amount()));
         } else {
             account.setBalance(account.getBalance().subtract(data.amount()));
         }
 
-        // 4. Salvar as alterações
-        accountRepository.save(account); // Salva o novo saldo
-        transactionRepository.save(transaction); // Salva o histórico
+        accountRepository.save(account);
+        transactionRepository.save(transaction);
 
-        // 5. Retornar o DTO
         return TransactionResponseDTO.fromEntity(transaction);
     }
 }
