@@ -25,7 +25,7 @@ public class AccountService {
     public AccountResponseDTO createAccount(CreateAccountDTO dto) {
         Account account = new Account();
         account.setName(dto.getName());
-        account.setAccountType(AccountType.valueOf(dto.getAccountType().toUpperCase()));
+        account.setAccountType(dto.getAccountType());
 
         Account savedAccount = accountRepository.save(account);
         return accountMapper.toDTO(savedAccount);
@@ -50,7 +50,7 @@ public class AccountService {
                 .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada."));
 
         account.setName(dto.getName());
-        account.setAccountType(AccountType.valueOf(dto.getAccountType().toUpperCase()));
+        account.setAccountType(dto.getAccountType());
 
         Account updatedAccount = accountRepository.save(account);
         return accountMapper.toDTO(updatedAccount);

@@ -26,6 +26,7 @@ public class TransactionService {
         Account account = accountRepository.findById(data.accountId())
                 .orElseThrow(() -> new ResourceNotFoundException("Conta não encontrada com ID: " + data.accountId()));
 
+
         Transaction transaction = new Transaction();
         transaction.setAmount(data.amount());
         transaction.setType(data.type());
