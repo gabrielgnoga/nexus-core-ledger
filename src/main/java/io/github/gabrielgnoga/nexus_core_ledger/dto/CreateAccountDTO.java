@@ -5,7 +5,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * Data Transfer Object (DTO) responsável por capturar os dados iniciais
  * para a criação de uma nova conta.
@@ -16,7 +19,8 @@ import lombok.Data;
  * @author Gabriel Gnoga
  * @since 1.0.0
  */
-
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Schema(description = "Dados para abertura de nova conta")
 public class CreateAccountDTO {

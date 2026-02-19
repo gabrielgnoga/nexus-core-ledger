@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
@@ -33,6 +34,9 @@ public class TransactionService {
         transaction.setDescription(data.description());
         transaction.setTimestamp(LocalDateTime.now());
         transaction.setAccount(account);
+
+        if (account.getBalance() == null) {
+            account.setBalance(BigDecimal.ZERO);}
 
         if (transaction.getType() == TransactionType.CREDIT) {
             account.setBalance(account.getBalance().add(data.amount()));
