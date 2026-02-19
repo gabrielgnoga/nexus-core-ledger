@@ -36,8 +36,8 @@ public class TransactionController {
     /**
      * Cria uma nova transação (Crédito ou Débito).
      *
-     * <p>Este método recebe uma solicitação, valida os campos obrigatórios
-     * e retorna o status 201 (Created) com os dados da transação processada.</p>
+     * <p>Este método recebe uma solicitação, valida os campos obrigatórios,
+     * verifica regras de saldo e retorna o status adequado.</p>
      *
      * @param data DTO contendo os dados da transação (valor, tipo, conta).
      * @return ResponseEntity contendo o DTO de resposta e o status HTTP 201.
@@ -45,8 +45,9 @@ public class TransactionController {
     @Operation(summary = "Criar nova transação", description = "Registra um crédito ou débito em uma conta existente e atualiza o saldo automaticamente.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Transação realizada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Erro de validação (ex: saldo insuficiente, valor negativo)"),
-            @ApiResponse(responseCode = "404", description = "Conta não encontrada")
+            @ApiResponse(responseCode = "400", description = "Erro de validação (ex: valor negativo, JSON inválido)"),
+            @ApiResponse(responseCode = "404", description = "Conta não encontrada"),
+            @ApiResponse(responseCode = "422", description = "Saldo insuficiente para operação de débito")
     })
     @PostMapping
     public ResponseEntity<TransactionResponseDTO> create(@RequestBody @Valid TransactionRequestDTO data) {
@@ -54,3 +55,4 @@ public class TransactionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
+

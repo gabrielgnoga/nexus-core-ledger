@@ -5,6 +5,7 @@ import io.github.gabrielgnoga.nexus_core_ledger.dto.TransactionResponseDTO;
 import io.github.gabrielgnoga.nexus_core_ledger.domain.model.Account;
 import io.github.gabrielgnoga.nexus_core_ledger.domain.model.Transaction;
 import io.github.gabrielgnoga.nexus_core_ledger.domain.model.TransactionType;
+import io.github.gabrielgnoga.nexus_core_ledger.exception.InsufficientBalanceException;
 import io.github.gabrielgnoga.nexus_core_ledger.repository.AccountRepository;
 import io.github.gabrielgnoga.nexus_core_ledger.repository.TransactionRepository;
 import io.github.gabrielgnoga.nexus_core_ledger.exception.ResourceNotFoundException;
@@ -41,7 +42,14 @@ public class TransactionService {
         if (transaction.getType() == TransactionType.CREDIT) {
             account.setBalance(account.getBalance().add(data.amount()));
         } else {
-            account.setBalance(account.getBalance().subtract(data.amount()));
+            BigDecimal novoSaldo = account.getBalance().subtract(data.amount());
+
+            if (novoSaldo.compareTo(BigDecimal.ZERO) < 0) {
+                throw new InsufficientBalanceException(
+                        "Saldo insuficiente para realizar a operação. Saldo atual: " + account.getBalance()
+                );
+            }
+            account.setBalance(novoSaldo);
         }
 
         accountRepository.save(account);
