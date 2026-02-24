@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
+
 /**
  * Manipulador Global de Exceções (Global Exception Handler).
  *
@@ -74,5 +76,16 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(status).body(apiError);
+    }
+    @ExceptionHandler(InsufficientBalanceException.class)
+    public ResponseEntity<ApiError> handleInsufficientBalance (InsufficientBalanceException e, HttpServletRequest request) {
+        ApiError err = new ApiError();
+        err.setTimestamp(LocalDateTime.now());
+        err.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value()); // 422
+        err.setError("Regra de Negócio / Saldo Insuficiente");
+        err.setMessage(e.getMessage());
+        err.setPath(request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
     }
 }
