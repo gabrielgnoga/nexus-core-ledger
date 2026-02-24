@@ -77,6 +77,17 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(status).body(apiError);
     }
+    /**
+     * Intercepta a exceção de Saldo Insuficiente e formata a resposta HTTP.
+     *
+     * <p>Impede que o sistema retorne um Erro 500 (Internal Server Error) genérico
+     * quando uma regra de negócio é violada. Em vez disso, devolve um status
+     * 422 (Unprocessable Entity) com os detalhes exatos do bloqueio da transação.</p>
+     *
+     * @param e A exceção capturada contendo a mensagem de erro original da camada de Serviço.
+     * @param request O objeto da requisição HTTP, usado para extrair o caminho (URI) onde a falha ocorreu.
+     * @return Um ResponseEntity contendo o objeto de erro padronizado em JSON e o status 422.
+     */
     @ExceptionHandler(InsufficientBalanceException.class)
     public ResponseEntity<ApiError> handleInsufficientBalance (InsufficientBalanceException e, HttpServletRequest request) {
         ApiError err = new ApiError();
