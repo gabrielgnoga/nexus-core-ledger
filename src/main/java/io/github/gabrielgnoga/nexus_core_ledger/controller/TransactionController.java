@@ -11,10 +11,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Controlador REST responsável por expor os endpoints de transações financeiras.
@@ -54,5 +54,25 @@ public class TransactionController {
         var response = transactionService.create(data);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-}
 
+    /**
+     * Recupera o extrato bancário de uma conta específica.
+     *
+     * <p>Busca todo o histórico de transações (créditos e débitos) vinculados
+     * ao ID da conta informado. A lista é retornada em ordem cronológica inversa
+     * (da transação mais recente para a mais antiga).</p>
+     *
+     * @param accountId O identificador único (UUID) da conta bancária.
+     * @return ResponseEntity contendo a lista de transações (DTOs) e o status HTTP 200 (OK).
+     */
+    @Operation(summary = "Obter extrato da conta", description = "Retorna o histórico completo de transações de uma conta, ordenado da mais recente para a mais antiga.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Extrato recuperado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Conta não encontrada")
+    })
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<List<TransactionResponseDTO>> getStatement(@PathVariable UUID accountId) {
+        var response = transactionService.getStatement(accountId);
+        return ResponseEntity.ok(response);
+    }
+}
