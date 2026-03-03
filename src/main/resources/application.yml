@@ -18,3 +18,8 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+    api:
+      security:
+        token:
+          secret: nexus-core-ledger-super-secret-key-2026
