@@ -31,6 +31,9 @@ public class AuthController {
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private io.github.gabrielgnoga.nexus_core_ledger.repository.UserRepository repository;
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid AuthenticationDTO data) {
 
@@ -41,5 +44,19 @@ public class AuthController {
         var token = tokenService.generateToken((User) auth.getPrincipal());
 
         return ResponseEntity.ok(new LoginResponseDTO(token));
+    }
+    @PostMapping("/register")
+    public ResponseEntity<Void> register(@RequestBody @Valid io.github.gabrielgnoga.nexus_core_ledger.dto.RegisterDTO data) {
+        if (this.repository.findByLogin(data.login()) != null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        String encryptedPassword = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(data.password());
+
+        User newUser = new User(data.login(), encryptedPassword);
+
+        this.repository.save(newUser);
+
+        return ResponseEntity.ok().build();
     }
 }

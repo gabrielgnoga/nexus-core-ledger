@@ -38,6 +38,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    public User(String login, String password) {
+        this.login = login;
+        this.password = password;
+    }
+
     /**
      * Define as "Roles" (Permissões) do usuário.
      * Por enquanto, todo mundo que logar vai ter a permissão padrão "ROLE_USER".
