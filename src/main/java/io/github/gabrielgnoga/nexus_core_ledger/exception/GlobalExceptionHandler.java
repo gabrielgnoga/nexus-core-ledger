@@ -3,10 +3,12 @@ package io.github.gabrielgnoga.nexus_core_ledger.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Manipulador Global de Exceções (Global Exception Handler).
@@ -99,4 +101,29 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
     }
+    /**
+     * Captura os erros de validação disparados pelas anotações (@Valid, @Email, @NotBlank, etc).
+     *
+     * <p>Extrai os campos específicos que falharam e formata uma mensagem limpa
+     * para o cliente entender exatamente o que ele preencheu errado.</p>
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.BAD_REQUEST; // 400
+
+        List<String> erros = ex.getBindingResult().getFieldErrors().stream()
+                .map(erro -> erro.getField() + ": " + erro.getDefaultMessage())
+                .toList();
+
+        ApiError apiError = new ApiError(
+                status.value(),
+                "Erro de Validação de Dados",
+                "Verifique os campos enviados: " + erros.toString(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(status).body(apiError);
+    }
+
 }

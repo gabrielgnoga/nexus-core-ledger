@@ -18,4 +18,11 @@ public class TestController {
     public ResponseEntity<String> secretRoute() {
         return ResponseEntity.ok("Acesso Liberado! Você está na área VIP da API e seu crachá é válido! ");
     }
+
+    @GetMapping("/erro")
+    public ResponseEntity<String> forceError() {
+        // Simulando que o usuário tentou buscar algo que não existe
+        throw new IllegalArgumentException("Testando o nosso para-quedas de erro global! O recurso não foi encontrado.");
+    }
+
 }
