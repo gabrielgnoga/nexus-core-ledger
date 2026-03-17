@@ -1,4 +1,15 @@
 package io.github.gabrielgnoga.nexus_core_ledger.dto;
 
-public record RegisterDTO(String login, String password) {
-}
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+public record RegisterDTO(
+
+        @NotBlank
+        @Email(message = "O formato deve ser um e-mail válido")
+        String login,
+
+        @NotBlank
+        String password
+
+) {}
