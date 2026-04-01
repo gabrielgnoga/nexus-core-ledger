@@ -21,7 +21,6 @@ public class TestController {
 
     @GetMapping("/erro")
     public ResponseEntity<String> forceError() {
-        // Simulando que o usuário tentou buscar algo que não existe
         throw new IllegalArgumentException("Testando o nosso para-quedas de erro global! O recurso não foi encontrado.");
     }
 
