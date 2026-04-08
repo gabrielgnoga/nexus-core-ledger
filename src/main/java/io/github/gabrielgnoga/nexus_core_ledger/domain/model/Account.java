@@ -64,6 +64,6 @@ public class Account {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         if (this.balance == null) this.balance = BigDecimal.ZERO;
-        if (this.currency == null) this.currency = "BRL"; // Garante um padrão
+        if (this.currency == null) this.currency = "BRL";
     }
 }
