@@ -1,8 +1,11 @@
 package io.github.gabrielgnoga.nexus_core_ledger.Integration;
 
 import io.github.gabrielgnoga.nexus_core_ledger.domain.model.Account;
+import io.github.gabrielgnoga.nexus_core_ledger.domain.model.AccountType;
+import io.github.gabrielgnoga.nexus_core_ledger.domain.model.Transaction;
 import io.github.gabrielgnoga.nexus_core_ledger.domain.model.User;
 import io.github.gabrielgnoga.nexus_core_ledger.repository.AccountRepository;
+import io.github.gabrielgnoga.nexus_core_ledger.repository.TransactionRepository;
 import io.github.gabrielgnoga.nexus_core_ledger.repository.UserRepository;
 import io.github.gabrielgnoga.nexus_core_ledger.service.TokenService;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +16,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,13 +30,11 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "spring.datasource.password=",
                 "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
                 "spring.jpa.hibernate.ddl-auto=create-drop",
-                "spring.jpa.show-sql=true",
-                "api.security.token.secret=minha-chave-secreta-de-teste-12345678",
-
+                "api.security.token.secret=minha-chave-secreta-de-teste-12345678"
         }
 )
 @ActiveProfiles("test")
-class AccountIntegrationTest {
+class TransactionIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -44,12 +46,17 @@ class AccountIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
     private TokenService tokenService;
 
     private String tokenValido;
+    private Account contaAlvo;
 
     @BeforeEach
     void setUp() {
+        transactionRepository.deleteAll();
         accountRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -57,35 +64,50 @@ class AccountIntegrationTest {
         userRepository.save(admin);
 
         tokenValido = tokenService.generateToken(admin);
+
+        contaAlvo = Account.builder()
+                .name("Conta de Investimentos")
+                .accountType(AccountType.valueOf("ASSET"))
+                .currency("BRL")
+                .balance(BigDecimal.ZERO)
+                .build();
+        accountRepository.save(contaAlvo);
     }
 
     @Test
-    void deveCriarContaComSucessoEGravarFisicamenteNoBanco() {
+    void deveProcessarDepositoComSucessoEAtualizarSaldoDaConta() {
 
         // ARRANGE
         String jsonRequest = """
                 {
-                    "name": "Conta Corrente Teste",
-                    "accountType": "EQUITY"
+                    "accountId": "%s",
+                    "amount": 500.00,
+                    "type": "CREDIT",
+                    "description": "Depósito inicial"
                 }
-                """;
+                """.formatted(contaAlvo.getId());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
         headers.setBearerAuth(tokenValido);
 
         HttpEntity<String> request = new HttpEntity<>(jsonRequest, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity("/api/accounts", request, String.class);
+        // ACT
+        ResponseEntity<String> response = restTemplate.postForEntity("/v1/transactions", request, String.class);
 
-        System.out.println("🚨 MENSAGEM DE ERRO DO SERVIDOR: " + response.getBody());
+        if (response.getStatusCode() != HttpStatus.CREATED) {
+            System.out.println("🚨 ERRO NO SERVIDOR: " + response.getBody());
+        }
+
         // ASSERT
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-        List<Account> contasNoBanco = accountRepository.findAll();
-        assertThat(contasNoBanco).hasSize(1);
-        assertThat(contasNoBanco.get(0).getName()).isEqualTo("Conta Corrente Teste");
-        assertThat(contasNoBanco.get(0).getBalance()).isNotNull();
+        List<Transaction> historico = transactionRepository.findAll();
+        assertThat(historico).hasSize(1);
+        assertThat(historico.get(0).getAmount()).isEqualByComparingTo(new BigDecimal("500.00"));
+
+        Account contaAtualizada = accountRepository.findById(contaAlvo.getId()).orElseThrow();
+        assertThat(contaAtualizada.getBalance()).isEqualByComparingTo(new BigDecimal("500.00"));
     }
 }

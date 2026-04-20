@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -56,6 +56,21 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Captura requisições para rotas ou recursos que não existem na API.
+     * Evita que um simples erro de digitação na URL vire um Erro 500 (Internal Server Error).
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiError> handleNoResourceFound(NoResourceFoundException ex, HttpServletRequest request) {
+        ApiError apiError = new ApiError(
+                HttpStatus.NOT_FOUND.value(),
+                "Recurso Não Encontrado",
+                "O endereço solicitado não existe na API. Verifique a URL e tente novamente.",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
+    }
+
+    /**
      * Captura genérica para qualquer exceção não tratada especificamente (Fallback).
      *
      * <p>Serve como uma rede de segurança para erros inesperados (NullPointer, falha de banco, etc).
@@ -79,6 +94,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(status).body(apiError);
     }
+
     /**
      * Intercepta a exceção de Saldo Insuficiente e formata a resposta HTTP.
      *
