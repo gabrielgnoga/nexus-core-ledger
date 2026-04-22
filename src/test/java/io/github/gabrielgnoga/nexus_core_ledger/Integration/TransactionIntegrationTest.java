@@ -97,7 +97,7 @@ class TransactionIntegrationTest {
         ResponseEntity<String> response = restTemplate.postForEntity("/v1/transactions", request, String.class);
 
         if (response.getStatusCode() != HttpStatus.CREATED) {
-            System.out.println("🚨 ERRO NO SERVIDOR: " + response.getBody());
+            System.out.println(" ERRO NO SERVIDOR: " + response.getBody());
         }
 
         // ASSERT
@@ -110,4 +110,72 @@ class TransactionIntegrationTest {
         Account contaAtualizada = accountRepository.findById(contaAlvo.getId()).orElseThrow();
         assertThat(contaAtualizada.getBalance()).isEqualByComparingTo(new BigDecimal("500.00"));
     }
+
+    @Test
+    void deveProcessarSaqueComSucessoEAtualizarSaldo() {
+
+        // ARRANGE
+        contaAlvo.setBalance(new BigDecimal("1000.00"));
+        accountRepository.save(contaAlvo);
+
+        String jsonRequest = """
+                {
+                    "accountId": "%s",
+                    "amount": 300.00,
+                    "type": "DEBIT",
+                    "description": "Saque no caixa eletrônico"
+                }
+                """.formatted(contaAlvo.getId());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(tokenValido);
+
+        HttpEntity<String> request = new HttpEntity<>(jsonRequest, headers);
+
+        // ACT
+        ResponseEntity<String> response = restTemplate.postForEntity("/v1/transactions", request, String.class);
+
+        if (response.getStatusCode() != HttpStatus.CREATED) {
+            System.out.println(" ERRO NO SERVIDOR: " + response.getBody());
+        }
+
+        // ASSERT
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        Account contaAtualizada = accountRepository.findById(contaAlvo.getId()).orElseThrow();
+        assertThat(contaAtualizada.getBalance()).isEqualByComparingTo(new BigDecimal("700.00"));
+    }
+
+    @Test
+    void deveBloquearSaqueQuandoSaldoForInsuficiente() {
+
+        // ARRANGE
+        String jsonRequest = """
+                {
+                    "accountId": "%s",
+                    "amount": 100.00,
+                    "type": "DEBIT",
+                    "description": "Tentativa de saque sem saldo"
+                }
+                """.formatted(contaAlvo.getId());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(tokenValido);
+
+        HttpEntity<String> request = new HttpEntity<>(jsonRequest, headers);
+
+        // ACT
+        ResponseEntity<String> response = restTemplate.postForEntity("/v1/transactions", request, String.class);
+
+        // ASSERT
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+
+        Account contaProtegida = accountRepository.findById(contaAlvo.getId()).orElseThrow();
+        assertThat(contaProtegida.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+
 }
+
