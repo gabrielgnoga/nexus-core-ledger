@@ -175,7 +175,32 @@ class TransactionIntegrationTest {
         Account contaProtegida = accountRepository.findById(contaAlvo.getId()).orElseThrow();
         assertThat(contaProtegida.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
     }
+    @Test
+    void deveBloquearRequisicaoSemTokenJwt() {
 
+        // ARRANGE: O Ataque
+        String jsonRequest = """
+                {
+                    "accountId": "%s",
+                    "amount": 9999.00,
+                    "type": "CREDIT",
+                    "description": "Tentativa de invasão"
+                }
+                """.formatted(contaAlvo.getId());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> request = new HttpEntity<>(jsonRequest, headers);
+
+        // ACT
+        ResponseEntity<String> response = restTemplate.postForEntity("/v1/transactions", request, String.class);
+
+        assertThat(response.getStatusCode()).isIn(HttpStatus.FORBIDDEN, HttpStatus.UNAUTHORIZED);
+
+        Account contaProtegida = accountRepository.findById(contaAlvo.getId()).orElseThrow();
+        assertThat(contaProtegida.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
 
 }
 
