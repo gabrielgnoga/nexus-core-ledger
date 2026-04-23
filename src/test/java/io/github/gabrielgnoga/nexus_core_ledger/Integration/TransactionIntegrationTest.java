@@ -229,5 +229,43 @@ class TransactionIntegrationTest {
         Account contaProtegida = accountRepository.findById(contaAlvo.getId()).orElseThrow();
         assertThat(contaProtegida.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
     }
+    @Test
+    void deveListarTransacoesDaContaComSucesso() {
+
+        // ARRANGE
+        String jsonDeposito = """
+                {
+                    "accountId": "%s",
+                    "amount": 150.00,
+                    "type": "CREDIT",
+                    "description": "Salário"
+                }
+                """.formatted(contaAlvo.getId());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(tokenValido);
+
+        HttpEntity<String> requestDeposito = new HttpEntity<>(jsonDeposito, headers);
+        restTemplate.postForEntity("/v1/transactions", requestDeposito, String.class);
+
+        HttpEntity<Void> requestGet = new HttpEntity<>(headers);
+
+        // ACT
+        String urlListagem = "/v1/transactions/account/" + contaAlvo.getId();
+
+        ResponseEntity<String> response = restTemplate.exchange(urlListagem, HttpMethod.GET, requestGet, String.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            System.out.println(" ERRO NO GET: " + response.getBody());
+        }
+
+        // ASSERT
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("150.00");
+        assertThat(response.getBody()).contains("Salário");
+    }
 }
 
