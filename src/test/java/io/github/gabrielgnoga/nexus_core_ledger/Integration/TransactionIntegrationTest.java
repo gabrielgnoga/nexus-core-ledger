@@ -201,6 +201,33 @@ class TransactionIntegrationTest {
         Account contaProtegida = accountRepository.findById(contaAlvo.getId()).orElseThrow();
         assertThat(contaProtegida.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
     }
+    @Test
+    void deveRetornarErro400QuandoValorDaTransacaoForNegativo() {
 
+        // ARRANGE
+        String jsonRequest = """
+                {
+                    "accountId": "%s",
+                    "amount": -50.00,
+                    "type": "CREDIT",
+                    "description": "Tentativa de depósito negativo"
+                }
+                """.formatted(contaAlvo.getId());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(tokenValido);
+
+        HttpEntity<String> request = new HttpEntity<>(jsonRequest, headers);
+
+        // ACT
+        ResponseEntity<String> response = restTemplate.postForEntity("/v1/transactions", request, String.class);
+
+        // ASSERT
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+        Account contaProtegida = accountRepository.findById(contaAlvo.getId()).orElseThrow();
+        assertThat(contaProtegida.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
 }
 
