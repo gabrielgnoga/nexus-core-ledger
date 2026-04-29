@@ -8,6 +8,7 @@ import io.github.gabrielgnoga.nexus_core_ledger.repository.UserRepository;
 import io.github.gabrielgnoga.nexus_core_ledger.service.TokenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,8 +23,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(AuthController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@WebMvcTest(value = AuthController.class, excludeAutoConfiguration = {SecurityAutoConfiguration.class})
+
 class AuthControllerTest {
 
     @Autowired
@@ -69,7 +70,7 @@ class AuthControllerTest {
     @Test
     void deveRegistrarNovoUsuarioComSucesso() throws Exception {
         // ARRANGE
-        RegisterDTO registerDTO = new RegisterDTO("novo.usuario", "senha123");
+        RegisterDTO registerDTO = new RegisterDTO("usuario@email.com", "senha123");
 
         when(repository.findByLogin(registerDTO.login())).thenReturn(null);
 
