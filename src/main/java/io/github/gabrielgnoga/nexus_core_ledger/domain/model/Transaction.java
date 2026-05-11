@@ -3,7 +3,7 @@ package io.github.gabrielgnoga.nexus_core_ledger.domain.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString; // Importante para evitar o loop
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
